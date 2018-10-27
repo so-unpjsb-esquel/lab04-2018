@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="laboratorio-4---administración-de-memoria">Laboratorio 4 - Administración de Memoria</h1>
+<h2 id="preliminares">Preliminares</h2>
+<p>Leer el apunte de práctica sobre administración de memoria en <em>xv6</em>, y el Capítulo 2 &quot;Page Tables&quot; del libro de <em>xv6</em>, para los ejercicios 2 y 3.</p>
+<h2 id="ejercicio-1-contador-de-páginas-en-xv6">Ejercicio 1: Contador de páginas en <em>xv6</em></h2>
+<p>Agregar a <em>xv6</em> una llamada al sistema de nombre <code>pgcnt()</code> que retorne la cantidad de páginas en uso del proceso actual. El código de la llamada al sistema se encuentra en el archivo <code>sys_pgcnt.c</code>. El archivo <code>pgcnt.c</code> es un programa de usuario que invoca a esta llamada al sistema.</p>
+<p>Modificar el programa <code>pgcnt.c</code> para acepte como argumento un número que indique la cantidad de páginas que tiene que reservar de memoria dinámicante. El programa debe imprimir primero cuantas páginas utiliza antes y despues de reservar más memoria. Por ejemplo, si se ejecuta pidiendo 5 páginas:</p>
+<pre><code>$ pgcnt 5
+6
+11
+$
+</code></pre>
+<p><em>Tip</em>: pueden usar las funciones <code>malloc()</code> o <code>sbrk()</code> para incrementar la memoria utilizada por el proceso.</p>
+<h3 id="entrega">Entrega:</h3>
+<p>Copiar en el repositorio el archivo <code>pgcnt.c</code> modificado, con el código comentado explicando las modificaciones.</p>
+<h2 id="ejercicio-2-lazy-allocation-en-xv6">Ejercicio 2: <em>Lazy allocation</em> en <em>xv6</em></h2>
+<p>Muchos programas reservan memoria que pueden no utilizar nunca, como por ejemplo, un arreglo de gran tamaño. El sistema operativo puede retrasar la asignación de memoria a estas secciones hasta que sean requeridos para su lectura/escritura. Cuando un proceso quiere acceder a estas secciones de memoria, ocurre un <em>page fault</em> (fallo de página), y el sistema operativo carga las páginas requeridas desde disco. Una estrategia basada en este comportamiento se denomina <em>lazy allocation</em>.</p>
+<h3 id="parte-1">Parte 1</h3>
+<p>En <em>xv6</em> los procesos piden más memoria al sistema por medio de la llamada a sistema <code>sbrk()</code>, implementada con la función <code>sys_sbrk()</code> en el archivo <code>sysproc.c</code>.</p>
+<p>Primero se eliminara la reserva de memoria que realiza <code>sys_sbrk()</code>, comentando la llamada a <code>growproc()</code>. De esta manera, sólo se incrementa la variable que indica tamaño del proceso (<code>proc-&gt;sz</code>) y se retorna el tamaño anterior, pero sin reservar efectivamente memoria.</p>
+<p>Hecha esta modificación, compilar y ejecutar <em>xv6</em> y ejecutar el comando <code>echo hola</code>.</p>
+<ul>
+<li>¿Qué error aparece? ¿A qué tipo de error se refiere el número indicado por <code>trap</code>?</li>
+</ul>
+<h3 id="parte-2">Parte 2</h3>
+<p>Modificar el código en el archivo <code>trap.c</code>, para que ante un <em>page fault</em>, producido por un programa a nivel de usuario, realice la carga de la página correspondiente a la dirección de memoria virtual que causó el <em>page fault</em>. No se necesitan cubrir todos los casos posibles de error, debe bastar para ejecutar comando simples como <code>echo</code> o <code>ls</code>.</p>
+<ul>
+<li>Para verificar si ocurrió un <em>page fault</em>, comprobar en la función <code>trap()</code> si <code>tf-&gt;trapno</code> es igual a <code>T_PGFLT</code>.</li>
+<li>Consultar los argumentos a <code>cprintf()</code> para ver cómo identificar la dirección virtual.</li>
+<li>Usar código de la función <code>allocuvm()</code> en el archivo <code>vm.c</code>, que es la función que invoca <code>growproc()</code>.</li>
+<li>Usar <code>PGROUNDDOWN()</code> para obtener la dirección base de la página física (marco).</li>
+<li>Será necesario invocar a <code>mappages()</code>, por lo que hay que eliminar la sentencia <code>static</code> de su declaración en el archivo <code>vm.c</code>, y agregar su prototipo en <code>trap.c</code>.</li>
+</ul>
+<h3 id="entrega-1">Entrega</h3>
+<p>Copiar en el repositorio del Laboratorio el archivo <code>trap.c</code> modificado, y un archivo de texto donde se responda las preguntas de la Parte 1 del Ejercicio.</p>
+<hr />
+<p>¡Fín del Laboratorio 4!</p>
+</body>
+</html>
