@@ -1,0 +1,17 @@
+    case T_PGFLT:
+        /* rcr2() devuelve la dirección virtual que causo el pagefault.
+         * Con PGROUNDDOWN obtenemos la direccion inicial de la pagina correspondiente. */
+        a = PGROUNDDOWN(rcr2());
+
+        /* Reservamos memoria -- kalloc() retorna una pagina fisica libre */
+        mem = kalloc();
+
+        /* Rellenamos de cero la pagina, para eliminar cualquier contenido previo */
+        memset(mem, 0, PGSIZE);
+
+        /* Crea una nueva entrada en la tabla de paginas -- proc->pgdir apunta al directorio
+         * de paginas del proceso, (char*)a es la dirección base de la pagina virtual,
+         * PGSIZE el tamaño, v2p(mem) indica la dirección de la pagina fisica (marco) y
+         * PTE_W|PTE_U son los permisos (escritura y acceso para usuario). */
+        mappages(proc->pgdir, (char*)a, PGSIZE, v2p(mem), PTE_W|PTE_U);
+        break;
